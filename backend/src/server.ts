@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createHash, timingSafeEqual } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,8 +17,36 @@ import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { HackathonCodeEmail } from "./emailTemplate";
 
+function secretEquals(a: string, b: string) {
+  const left = createHash("sha256").update(a).digest();
+  const right = createHash("sha256").update(b).digest();
+  return timingSafeEqual(left, right);
+}
+
 const app = new Hono();
-app.use("*", cors({ origin: process.env.CORS_ORIGIN ?? "*", credentials: true }));
+const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+app.use(
+  "*",
+  cors({
+    origin: corsOrigin,
+    credentials: true,
+    allowHeaders: ["Content-Type", "Authorization", "X-Admin-Secret"],
+  })
+);
+
+app.use("/api/*", async (c, next) => {
+  const expected = process.env.ADMIN_API_SECRET;
+  if (!expected) {
+    return c.json({ error: "ADMIN_API_SECRET is not configured" }, 503);
+  }
+  const header = c.req.header("authorization") ?? "";
+  const bearer = header.replace(/^Bearer\s+/i, "");
+  const provided = bearer || c.req.header("x-admin-secret") || "";
+  if (!provided || !secretEquals(provided, expected)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  await next();
+});
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -157,8 +186,9 @@ app.delete("/api/attendees/:id", async (c) => {
 });
 
 const port = Number(process.env.PORT ?? 8787);
-serve({ fetch: app.fetch, port }, () => {
-  console.log(`Hono listening on http://localhost:${port}`);
+const hostname = process.env.BIND_HOST ?? "127.0.0.1";
+serve({ fetch: app.fetch, port, hostname }, () => {
+  console.log(`Hono listening on http://${hostname}:${port}`);
 });
 
 
