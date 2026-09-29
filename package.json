@@ -11,15 +11,15 @@
     "lint": "tsc -p . -noEmit --pretty false && vite build"
   },
   "dependencies": {
-    "@hono/node-server": "^1.18.1",
+    "@hono/node-server": "^2.1.1",
     "@react-email/components": "^0.4.0",
     "@react-email/render": "^1.1.4",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^0.44.4",
-    "hono": "^4.9.0",
-    "node-postgres@latest": "link:drizzle-orm/node-postgres@latest",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.3",
+    "node-postgres": "link:drizzle-orm/node-postgres@latest",
     "pg": "^8.16.3",
-    "pg-core@latest": "link:drizzle-orm/pg-core@latest",
+    "pg-core": "link:drizzle-orm/pg-core@latest",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^6.0.1",
@@ -41,11 +41,11 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "npm-run-all": "^4.1.5",
-    "postcss": "~8",
+    "postcss": "~8.5.26",
     "prettier": "^3.5.3",
     "tailwindcss": "~3",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
-    "vite": "^6.2.0"
+    "vite": "^8.2.2"
   }
 }
